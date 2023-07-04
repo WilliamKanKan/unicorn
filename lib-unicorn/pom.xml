@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>unicorn</artifactId>
+        <groupId>com.sztus.unicorn</groupId>
+        <version>0.0.1</version>
+        <relativePath/>
+    </parent>
+    <groupId>com.sztus.unicorn</groupId>
+    <artifactId>lib-unicorn</artifactId>
+    <version>1.0.0</version>
+    <modules>
+        <module>spring</module>
+        <module>core</module>
+        <module>cache</module>
+        <module>database</module>
+    </modules>
+    <packaging>pom</packaging>
+    <!--全局参数-->
+    <properties>
+        <!-- jdk版本 -->
+        <java.version>1.8</java.version>
+        <!-- 编码 -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <!--maven 编译 ，没有则采用maven 全局默认编译版本-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <!-- maven 执行测试用例的插件，不显示配置就会默认配置-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+

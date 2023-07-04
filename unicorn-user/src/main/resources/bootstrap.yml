@@ -1,0 +1,37 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        enabled: true
+        service: ${szt.nacos.application-name}
+        server-addr: ${szt.nacos.addr}
+        namespace: ${szt.nacos.namespace}
+        group: ${szt.nacos.group}
+      config:
+        file-extension: yaml
+        server-addr: ${szt.nacos.addr}
+        name: ${szt.nacos.application-name}
+        namespace: ${szt.nacos.namespace}
+        group: ${szt.nacos.group}
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+szt:
+  nacos:
+    addr: 127.0.0.1:8848
+    application-name: unicorn-user
+    namespace: 5c94ba24-a7b9-4a11-933f-22b1ce49c41b
+    group: local
+---
+spring:
+  config:
+    activate:
+      on-profile: local-server
+szt:
+  nacos:
+    addr: 172.18.1.251:8848
+    application-name: unicorn-user
+    namespace: unicorn
+    group: local-server

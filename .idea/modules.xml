@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/lib-unicorn/cache/cache.iml" filepath="$PROJECT_DIR$/lib-unicorn/cache/cache.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-unicorn/core/core.iml" filepath="$PROJECT_DIR$/lib-unicorn/core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-unicorn/database/database.iml" filepath="$PROJECT_DIR$/lib-unicorn/database/database.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-unicorn/lib-unicorn.iml" filepath="$PROJECT_DIR$/lib-unicorn/lib-unicorn.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-unicorn/spring/spring.iml" filepath="$PROJECT_DIR$/lib-unicorn/spring/spring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/unicorn.iml" filepath="$PROJECT_DIR$/unicorn.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-unicorn/spring/unicorn-search/unicorn-search.iml" filepath="$PROJECT_DIR$/lib-unicorn/spring/unicorn-search/unicorn-search.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-unicorn/spring/unicorn-user/unicorn-user.iml" filepath="$PROJECT_DIR$/lib-unicorn/spring/unicorn-user/unicorn-user.iml" />
+    </modules>
+  </component>
+</project>

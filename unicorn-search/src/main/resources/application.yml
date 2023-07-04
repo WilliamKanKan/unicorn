@@ -1,0 +1,47 @@
+server:
+  port: 8511
+  servlet:
+    #  统一访问前缀
+    context-path: /
+spring:
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+  mail:
+    host: smtp.qq.com
+    username: 554771003@qq.com
+    password: jcegvvqipbuibbib
+  datasource:
+    dynamic:
+      primary: writer
+      datasource:
+        writer:
+          url: jdbc:mysql://${szt.database.writer.url}/${szt.database.schema}?charset=utf8mb4&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true
+          username: ${szt.database.username}
+          password: ${szt.database.password}
+        reader:
+          url: jdbc:mysql://${szt.database.reader.url}/${szt.database.schema}?charset=utf8mb4&useSSL=false&rewriteBatchedStatements=true&autoReconnect=true
+          username: ${szt.database.username}
+          password: ${szt.database.password}
+  redis:
+    jedis:
+      pool:
+        MaxTotal: 1000
+        minIdle: 1
+        maxWaitMillis: 5000
+        maxIdle: 5
+        testOnBorrow: true
+        testOnReturn: true
+        testWhileIdle: true
+    primary:
+      writer:
+        database: ${szt.redis.primary.writer.database}
+        hostName: ${szt.redis.primary.writer.url}
+        port: ${szt.redis.primary.writer.port}
+      reader:
+        database: ${szt.redis.primary.reader.database}
+        hostName: ${szt.redis.primary.reader.url}
+        port: ${szt.redis.primary.reader.port}
+logging:
+  level:
+    com.sztus.unicorn.search.repository.mapper.: debug
