@@ -13,9 +13,7 @@ public class UserLimit {
     @TableId(value = "id",type = IdType.AUTO)
 
     private Long id;
-    @TableField(value = "user_id")
     private Long userId;
-    @TableField(value = "limit_value")
     private Integer limitValue;
 }
 

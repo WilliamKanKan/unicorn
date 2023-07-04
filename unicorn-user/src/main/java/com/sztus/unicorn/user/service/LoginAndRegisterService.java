@@ -2,7 +2,9 @@ package com.sztus.unicorn.user.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.sztus.unicorn.lib.cache.core.SimpleRedisRepository;
 import com.sztus.unicorn.lib.core.enumerate.CodeEnum;
@@ -46,16 +48,16 @@ public class LoginAndRegisterService {
         // 先通过email查询来判断用户是否存在
         log.info(email.getClass().getSimpleName());
         log.info(password);
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email", email).select("open_id","id","name","email");
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email);
         User user = userMapper.selectOne(queryWrapper);
         if (user != null) {
             // user表存在数据再去判断account表数据是否存在
-            QueryWrapper<Account> queryWrapperAccount = new QueryWrapper<>();
-            queryWrapperAccount.eq("open_id", user.getOpenId()).select("open_id","password","token","salt");
+            LambdaQueryWrapper<Account> queryWrapperAccount = new LambdaQueryWrapper<>();
+            queryWrapperAccount.eq(Account::getOpenId, user.getOpenId());
             Account account = accountMapper.selectOne(queryWrapperAccount);
-            QueryWrapper<UserLimit> queryWrapperLimit = new QueryWrapper<>();
-            queryWrapperLimit.eq("user_id", user.getId()).select("user_id","limit_value");
+            LambdaQueryWrapper<UserLimit> queryWrapperLimit = new LambdaQueryWrapper<>();
+            queryWrapperLimit.eq(UserLimit::getUserId, user.getId());
             UserLimit userLimit  = userLimitMapper.selectOne(queryWrapperLimit);
             if (account != null) {
                 // 两个数据都存在，下面进行密码判断，首先去account表里将salt拿到，然后和用户输入的password进行拼接再加密
@@ -79,8 +81,8 @@ public class LoginAndRegisterService {
                     // 判断设置的数据是否生效，生效的话就把token和过期时间存到account表中，并返回给前端所有数据
                     if(limitStrKey != null && accStrKey != null && userStrKey != null){
                         account.setExpiredAt(System.currentTimeMillis()+NumberCode.EXPIRED_TIME*1000);
-                        UpdateWrapper<Account> updateWrapperAccount = new UpdateWrapper<>();
-                        updateWrapperAccount.eq("open_id", account.getOpenId());
+                        LambdaUpdateWrapper<Account> updateWrapperAccount = new LambdaUpdateWrapper<>();
+                        updateWrapperAccount.eq(Account::getOpenId, account.getOpenId());
                         accountMapper.update(account, updateWrapperAccount);
                         // 用于去掉当从redis中取数据时带的斜杆 /
                         JSONObject jsonObjectAcc= (JSONObject) JSON.parse(accStrKey);
@@ -111,8 +113,8 @@ public class LoginAndRegisterService {
         UserLimit userLimit = new UserLimit();
         LimitLog limitLog = new LimitLog();
         // 通过email查询数据库是否有相同名字或者相同email的用户，如果有则提示已存在，没有再进行下面验证
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", user.getName()).or().eq("email", user.getEmail()).select("name","email");
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getName, user.getName()).or().eq(User::getEmail, user.getEmail());
         User existingUser = userMapper.selectOne(queryWrapper);
         String emailValidationResult = NumVerifyUtil.emailMatcher(user.getEmail());
         String passwordValidationResult = NumVerifyUtil.passwordMatcher(user.getPassword());

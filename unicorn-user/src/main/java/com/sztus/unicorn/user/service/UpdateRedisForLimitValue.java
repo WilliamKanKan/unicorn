@@ -1,6 +1,7 @@
 package com.sztus.unicorn.user.service;
 
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sztus.unicorn.lib.cache.core.SimpleRedisRepository;
 import com.sztus.unicorn.lib.core.type.RedisKeyType;
@@ -24,14 +25,14 @@ public class UpdateRedisForLimitValue {
     @Autowired
     AccountMapper accountMapper;
     public void updateRedisForLimitValue(User user){
-        QueryWrapper<Account> queryWrapperAccount = new QueryWrapper<>();
-        queryWrapperAccount.eq("open_id", user.getOpenId()).select("open_id","password","token","salt","expired_at");
+        LambdaQueryWrapper<Account> queryWrapperAccount = new LambdaQueryWrapper<>();
+        queryWrapperAccount.eq(Account::getOpenId, user.getOpenId());
         Account account = accountMapper.selectOne(queryWrapperAccount);
         String userLimitKey = simpleRedisRepository.generateKey(RedisKeyType.USERLIMIT,account.getToken());
         String limitStrKey = simpleRedisRepository.get(userLimitKey);
         if(limitStrKey!=null){
-            QueryWrapper<UserLimit> queryWrapperLimit = new QueryWrapper<>();
-            queryWrapperLimit.eq("user_id", user.getId()).select("user_id","limit_value");
+            LambdaQueryWrapper<UserLimit> queryWrapperLimit = new LambdaQueryWrapper<>();
+            queryWrapperLimit.eq(UserLimit::getUserId, user.getId());
             UserLimit userLimit  = userLimitMapper.selectOne(queryWrapperLimit);
             Long expiredTime = simpleRedisRepository.getExpire(userLimitKey);
             log.info("过期时间" + expiredTime.toString());

@@ -27,25 +27,39 @@ public class UserOperationController {
     private SimpleRedisRepository simpleRedisRepository;
     @Autowired
     ObjectMapper newObjectMapper;
+    // redis中查询余额
     @GetMapping(value = "/query")
     public JSONObject queryLimitValue(HttpServletRequest request){
         String tokenKey = request.getHeader("tokenKey");
         // 根据token从Redis中获取用户信息
         String userLimitKey = simpleRedisRepository.generateKey(RedisKeyType.USERLIMIT, tokenKey);
-        String userInfoJson = simpleRedisRepository.get(userLimitKey);
-        if (userInfoJson != null) {
-            // 用户信息存在于Redis中
-            try {
-                JsonNode jsonNode = newObjectMapper.readTree(userInfoJson);
-                int limitValue = jsonNode.get("limitValue").asInt();
-                return JSON.parseObject(AjaxResult.success("limitValue: " + limitValue, CodeEnum.SUCCESS.getText()));
-
-            } catch (JsonProcessingException e) {
-                return JSON.parseObject(AjaxResult.failure("Invalid JSON response"));
-            }
-    }else {
+        String userLimitStr = simpleRedisRepository.get(userLimitKey);
+        if (userLimitStr != null) {
+            JSONObject jsonObjectUser = (JSONObject) JSON.parse(userLimitStr);
+            return JSONObject.parseObject(AjaxResult.success(jsonObjectUser,CodeEnum.SUCCESS.getText()));
+        }
+        else {
             return JSON.parseObject(AjaxResult.failure("Token not found or expired"));
         }
+    }
+    @GetMapping(value = "/queryable")
+    public JSONObject queryValue(Long userId){
+        return JSON.parseObject(userOperationService.queryLimitValueByUserId(userId));
+    }
+    @GetMapping(value = "/token_verify")
+    public JSONObject tokenVerify(HttpServletRequest request){
+        String tokenKey = request.getHeader("tokenKey");
+        // 根据token从Redis中获取用户信息
+        String userKey = simpleRedisRepository.generateKey(RedisKeyType.USER, tokenKey);
+        String userInfo = simpleRedisRepository.get(userKey);
+        if(userInfo != null){
+            JSONObject jsonObjectUser = (JSONObject) JSON.parse(userInfo);
+          return JSONObject.parseObject(AjaxResult.success(jsonObjectUser,CodeEnum.SUCCESS.getText()));
+        }
+        else {
+            return JSON.parseObject(AjaxResult.failure("Token not found or expired"));
+        }
+
     }
     @PostMapping(value = "/recharge")
     public JSONObject limitLogRecharge(HttpServletRequest request, @RequestBody JSONObject jsonObject) {
