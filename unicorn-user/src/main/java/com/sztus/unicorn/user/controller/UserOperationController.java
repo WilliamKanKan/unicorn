@@ -55,7 +55,7 @@ public class UserOperationController {
         String userInfoJson = simpleRedisRepository.get(userLimitKey);
         String amount = jsonObject.getString("amount");
         if (userInfoJson != null) {
-            // 用户信息存在于Redis中
+            // 用户信息存在于Redis中,将它取出
             try {
                 JsonNode jsonNode = newObjectMapper.readTree(userInfoJson);
                 Long userId = jsonNode.get("userId").asLong();
