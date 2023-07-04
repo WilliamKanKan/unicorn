@@ -9,6 +9,8 @@ import com.sztus.unicorn.user.service.SendCodeToEmail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @CrossOrigin
@@ -24,8 +26,6 @@ public class LoginAndRegisterController {
     private SendCodeToEmail sendCodeToEmail;
     @Autowired
     private ResetPasswordService resetPasswordService;
-    @Autowired
-    private ObjectMapper objectMapper;
     @PostMapping("/login")
     public JSONObject userLogin(@RequestBody User user) {
         String email = user.getEmail();
@@ -33,11 +33,16 @@ public class LoginAndRegisterController {
         return loginAndRegisterService.login(email,password);
 
     }
+    @PostMapping(value = "/logout")
+    public void userLogout(HttpServletRequest request){
+        String token = request.getHeader("Access-Token");
+        loginAndRegisterService.logout(token);
+    }
     @PostMapping("/register")
     public JSONObject userRegister(@RequestBody User user) {
         return loginAndRegisterService.register(user);
     }
-    @PostMapping(value = "/sendcode")
+    @PostMapping(value = "/send_code")
     private JSONObject sendCode(@RequestBody User user){
         String name = user.getName();
         String email = user.getEmail();
@@ -54,6 +59,9 @@ public class LoginAndRegisterController {
         String email = jsonObject.getString("email");
         return resetPasswordService.resetPassword(email,password,confirmPassword,verifyCode);
     }
-
+    @PostMapping(value = "/profile")
+    private JSONObject profileEdit(@RequestBody User user){
+        return loginAndRegisterService.profileEdit(user);
+    }
 }
 

@@ -2,7 +2,7 @@ package com.sztus.unicorn.user.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sztus.unicorn.lib.cache.core.SimpleRedisRepository;
 import com.sztus.unicorn.lib.core.enumerate.CodeEnum;
 import com.sztus.unicorn.lib.core.type.AjaxResult;
@@ -28,14 +28,14 @@ public class ResetPasswordService {
     SimpleRedisRepository simpleRedisRepository;
     @Options(useGeneratedKeys = true, keyProperty = "id")
     public JSONObject resetPassword(String email, String password, String confirmPassword, String verifyCode) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email", email).select("name", "email", "open_id");
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getEmail, email);
         User existUser = userMapper.selectOne(queryWrapper);
         String passwordValidationResult = NumVerifyUtil.passwordMatcher(password);
         if (existUser != null) {
             if(existUser.getEmail().equals(email)){
-                QueryWrapper<Account> queryWrapperAccount = new QueryWrapper<>();
-                queryWrapperAccount.eq("open_id", existUser.getOpenId()).select("id", "open_id", "password", "salt");
+                LambdaQueryWrapper<Account> queryWrapperAccount = new LambdaQueryWrapper<>();
+                queryWrapperAccount.eq(Account::getOpenId, existUser.getOpenId());
                 Account account = accountMapper.selectOne(queryWrapperAccount);
                 if (account != null) {
                     if (!passwordValidationResult.equals("success")) {
@@ -54,7 +54,9 @@ public class ResetPasswordService {
                            account.setSalt(salt);
                            accountMapper.updateById(account);
                            simpleRedisRepository.delete(verifyCodeKey);
-                           return JSON.parseObject(AjaxResult.success("null",CodeEnum.SUCCESS.getText()));
+                           JSONObject response = JSONObject.parseObject(AjaxResult.success(CodeEnum.SUCCESS.getText()));
+                           response.remove("data");
+                           return response;
                        }
                        else {
                            return JSON.parseObject(AjaxResult.failure("Code is incorrect"));

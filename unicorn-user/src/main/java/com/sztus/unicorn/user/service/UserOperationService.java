@@ -1,6 +1,8 @@
 package com.sztus.unicorn.user.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.sztus.unicorn.lib.core.enumerate.CodeEnum;
 import com.sztus.unicorn.lib.core.type.AjaxResult;
@@ -28,14 +30,14 @@ public class UserOperationService {
     UserMapper userMapper;
     // 将充值和消费统一在一个方法里，通过传入不同的参数再定义两个不同的方法，然后将得到的数据用主方法返回
     private String updateLimit(Long userId, Integer amount) {
-        QueryWrapper<LimitLog> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId).select("id", "user_id", "amount", "created_at");
-        QueryWrapper<UserLimit> queryWrapperUserLimit = new QueryWrapper<>();
-        queryWrapperUserLimit.eq("user_id", userId).select("id", "user_id", "limit_value");
+        LambdaQueryWrapper<LimitLog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(LimitLog::getUserId, userId);
+        LambdaQueryWrapper<UserLimit> queryWrapperUserLimit = new LambdaQueryWrapper<>();
+        queryWrapperUserLimit.eq(UserLimit::getUserId, userId);
         LimitLog limitLog = limitLogMapper.selectOne(queryWrapper);
         UserLimit userLimit = userLimitMapper.selectOne(queryWrapperUserLimit);
-        QueryWrapper<User> queryWrapperForUser = new QueryWrapper<>();
-        queryWrapperForUser.eq("id",userId).select("id","open_id");
+        LambdaQueryWrapper<User> queryWrapperForUser = new LambdaQueryWrapper<>();
+        queryWrapperForUser.eq(User::getId,userId);
         User user = userMapper.selectOne(queryWrapperForUser);
         if (limitLog != null && userLimit != null) {
             if (amount > 0) {
@@ -53,8 +55,8 @@ public class UserOperationService {
             // 当amount和limit_log表里的amount都为0时，只执行user_limit表减1的操作
             else if (amount == 0 && limitLog.getAmount() == 0) {
                 userLimit.setLimitValue(userLimit.getLimitValue() -1);
-                UpdateWrapper<UserLimit> updateWrapperUserLimit = new UpdateWrapper<>();
-                updateWrapperUserLimit.eq("id", userLimit.getId());
+                LambdaUpdateWrapper<UserLimit> updateWrapperUserLimit = new LambdaUpdateWrapper<>();
+                updateWrapperUserLimit.eq(UserLimit::getId, userLimit.getId());
                 int rowsAffectedValue = userLimitMapper.update(userLimit, updateWrapperUserLimit);
                 if (rowsAffectedValue > 0) {
                     updateRedisForLimitValue.updateRedisForLimitValue(user);
@@ -73,10 +75,10 @@ public class UserOperationService {
 // 将更新操作封装在一个方法里
     @NotNull
     private String getString(LimitLog limitLog, UserLimit userLimit,User user) {
-        UpdateWrapper<LimitLog> updateWrapper = new UpdateWrapper<>();
-        UpdateWrapper<UserLimit> updateWrapperUserLimit = new UpdateWrapper<>();
-        updateWrapper.eq("id", limitLog.getId());
-        updateWrapperUserLimit.eq("id", userLimit.getId());
+        LambdaUpdateWrapper<LimitLog> updateWrapper = new LambdaUpdateWrapper<>();
+        LambdaUpdateWrapper<UserLimit> updateWrapperUserLimit = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(LimitLog::getId, limitLog.getId());
+        updateWrapperUserLimit.eq(UserLimit::getId, userLimit.getId());
         int rowsAffectedAmount = limitLogMapper.update(limitLog, updateWrapper);
         int rowsAffectedValue = userLimitMapper.update(userLimit, updateWrapperUserLimit);
         if (rowsAffectedAmount > 0 && rowsAffectedValue > 0) {
@@ -94,9 +96,10 @@ public class UserOperationService {
         return updateLimit(userId, 0);
     }
     public String queryLimitValueByUserId(Long userId){
-        QueryWrapper<UserLimit> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", userId);
+        LambdaQueryWrapper<UserLimit> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserLimit::getUserId, userId);
         UserLimit userLimit = userLimitMapper.selectOne(queryWrapper);
+        log.info(userLimit.toString());
         return AjaxResult.success(userLimit,CodeEnum.SUCCESS.getText());
     }
 }

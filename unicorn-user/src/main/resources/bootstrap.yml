@@ -22,7 +22,7 @@ szt:
   nacos:
     addr: 127.0.0.1:8848
     application-name: unicorn-user
-    namespace: 5c94ba24-a7b9-4a11-933f-22b1ce49c41b
+    namespace: unicorn
     group: local
 ---
 spring:
