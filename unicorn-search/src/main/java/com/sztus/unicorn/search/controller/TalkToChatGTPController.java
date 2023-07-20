@@ -42,9 +42,9 @@ public class TalkToChatGTPController {
             try {
                 JsonNode jsonNode = newObjectMapper.readTree(userInfoJson);
                 long userId = jsonNode.get("userId").asLong();
-                List<SearchLog> searchLogList = searchLogService.queryQuestionByUserId(userId);
+                JSONObject searchLogList = searchLogService.queryQuestionByUserId(userId);
                 if (searchLogList != null && !searchLogList.isEmpty()) {
-                    return JSON.parseObject(AjaxResult.success(searchLogList, CodeEnum.SUCCESS.getText()));
+                    return searchLogList;
                 } else {
                     return JSON.parseObject(AjaxResult.failure("No data found"));
                 }

@@ -1,5 +1,6 @@
 package com.sztus.unicorn.search.service;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sztus.unicorn.lib.core.enumerate.CodeEnum;
@@ -15,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -23,21 +26,54 @@ public class SearchLogService {
     @Autowired
     SearchLogMapper searchLogMapper;
     // 通过user_id查一个人的search记录
-    public List<SearchLog> queryQuestionByUserId(Long userId) {
+    public JSONObject queryQuestionByUserId(Long userId) {
         LambdaQueryWrapper<SearchLog> logLambdaQueryWrapper = new LambdaQueryWrapper<>();
         logLambdaQueryWrapper.eq(SearchLog::getUserId, userId);
         logLambdaQueryWrapper.orderByDesc(SearchLog::getCreatedAt);
-        return searchLogMapper.selectList(logLambdaQueryWrapper);
+        List<SearchLog> logs = searchLogMapper.selectList(logLambdaQueryWrapper);
+
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        for (SearchLog log : logs) {
+            String searchQuestionsJson = log.getSearchQuestions();
+            String searchAnswersJson = log.getSearchAnswers();
+            List<SearchQuestion> searchQuestions = JSON.parseArray(searchQuestionsJson, SearchQuestion.class);
+            List<SearchAnswer> searchAnswers = JSON.parseArray(searchAnswersJson, SearchAnswer.class);
+
+            Map<String, Object> entryMap = new HashMap<>();
+            entryMap.put("searchQuestions", searchQuestions);
+            entryMap.put("searchAnswers", searchAnswers);
+            entryMap.put("userId", log.getUserId());
+            entryMap.put("logId",log.getId());
+            resultList.add(entryMap);
+        }
+
+        return JSONObject.parseObject(AjaxResult.success(resultList, CodeEnum.SUCCESS.getText()));
     }
-    public JSONObject queryQuestionById(Long id){
+
+    public JSONObject queryQuestionById(Long id) {
         LambdaQueryWrapper<SearchLog> logLambdaQueryWrapper = new LambdaQueryWrapper<>();
         logLambdaQueryWrapper.eq(SearchLog::getId, id);
         logLambdaQueryWrapper.orderByDesc(SearchLog::getCreatedAt);
         SearchLog log = searchLogMapper.selectOne(logLambdaQueryWrapper);
-        return JSONObject.parseObject(AjaxResult.success(log, CodeEnum.SUCCESS.getText()));
+
+        if (log != null) {
+            String searchQuestionsJson = log.getSearchQuestions();
+            String searchAnswersJson = log.getSearchAnswers();
+
+            List<SearchQuestion> searchQuestions = JSON.parseArray(searchQuestionsJson, SearchQuestion.class);
+            List<SearchAnswer> searchAnswers = JSON.parseArray(searchAnswersJson, SearchAnswer.class);
+            List<Object> list = new ArrayList<>();
+            list.add(searchQuestions);
+            list.add(searchAnswers);
+            return JSONObject.parseObject(AjaxResult.success(list, CodeEnum.SUCCESS.getText()));
+        }else {
+            return JSONObject.parseObject(AjaxResult.failure());
+        }
 
 
     }
+
+
     public JSONObject deleteLogs(Long id, Long userId) {
         LambdaQueryWrapper<SearchLog> logLambdaQueryWrapper = new LambdaQueryWrapper<>();
         if (id != null) {
