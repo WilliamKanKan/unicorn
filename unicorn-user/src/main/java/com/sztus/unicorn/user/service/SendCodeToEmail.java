@@ -2,7 +2,7 @@ package com.sztus.unicorn.user.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.sztus.unicorn.lib.cache.core.SimpleRedisRepository;
 import com.sztus.unicorn.lib.core.enumerate.CodeEnum;
 import com.sztus.unicorn.lib.core.type.AjaxResult;
@@ -30,8 +30,8 @@ public class SendCodeToEmail {
     private JavaMailSender javaMailSender;
 
     public JSONObject generateCodeAndSend(String name, String email){
-        LambdaQueryWrapper<User> queryWrapperUser = new LambdaQueryWrapper<>();
-        queryWrapperUser.eq(User::getName, name);
+        QueryWrapper<User> queryWrapperUser = new QueryWrapper<>();
+        queryWrapperUser.eq("name", name).select("id","name","email");
         User user = userMapper.selectOne(queryWrapperUser);
         if(user != null){
             if(user.getEmail().equals(email)){
@@ -42,10 +42,8 @@ public class SendCodeToEmail {
                  String verifyCode = String.valueOf(new Random().nextInt(899999) + 100000);
                  simpleRedisRepository.set(verifyCodeKey, verifyCode,NumberCode.TIMEOUT);
                  // 发送email的方法
-                 sendEmail(email, "Verification Code", "Your verification code is: " + verifyCode + ", 5 minutes expired!");
-                    JSONObject response = JSONObject.parseObject(AjaxResult.success(CodeEnum.SUCCESS.getText()));
-                    response.remove("data");
-                    return response;
+               sendEmail(email, "Verification Code", "Your verification code is: " + verifyCode + ",5 minutes expired!");
+                    return JSON.parseObject(AjaxResult.success("null",CodeEnum.SUCCESS.getText()));
                 }else {
                     return JSON.parseObject(AjaxResult.failure("Code exist"));
                 }
