@@ -36,18 +36,15 @@ public class TalkToChatGTPController {
     ObjectMapper newObjectMapper;
 
     // 查询search记录
-    @PostMapping(value = "/query")
-    public JSONObject queryQuestion(HttpServletRequest request,@RequestBody JSONObject jsonObject) {
+    @GetMapping(value = "/query")
+    public JSONObject queryQuestion(HttpServletRequest request) {
         String userInfoJson = (String) request.getAttribute("userInfoJson");
-        Long startDate = jsonObject.getLongValue("startDate");
-        Long endDate = jsonObject.getLongValue("endDate");
-        if (endDate > startDate && startDate > NumberCode.DATE_YEAR){
             try {
                 JsonNode jsonNode = newObjectMapper.readTree(userInfoJson);
                 long userId = jsonNode.get("userId").asLong();
-                List<SearchLog> searchLogList = searchLogService.queryQuestionByUserIdAndDate(userId, startDate, endDate);
+                JSONObject searchLogList = searchLogService.queryQuestionByUserId(userId);
                 if (searchLogList != null && !searchLogList.isEmpty()) {
-                    return JSON.parseObject(AjaxResult.success(searchLogList, CodeEnum.SUCCESS.getText()));
+                    return searchLogList;
                 } else {
                     return JSON.parseObject(AjaxResult.failure("No data found"));
                 }
@@ -55,11 +52,13 @@ public class TalkToChatGTPController {
             catch (JsonProcessingException e) {
                 return JSON.parseObject(AjaxResult.failure("Invalid JSON response"));
             }
-        }else {
-            return JSON.parseObject(AjaxResult.failure("Date error"));
-        }
 
     }
+    @GetMapping(value = "/query_by_id")
+    public JSONObject queryQuestionById(@RequestParam Long id){
+        return  searchLogService.queryQuestionById(id);
+    }
+
     @PostMapping(value = "/delete")
     public JSONObject deleteQuestion(@RequestBody SearchLog searchLog) {
         Long id = searchLog.getId();
