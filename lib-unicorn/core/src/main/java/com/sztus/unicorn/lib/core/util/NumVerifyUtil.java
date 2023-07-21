@@ -43,9 +43,9 @@ public class NumVerifyUtil {
         }
     }
     public static final class MatchFormat{
-        public static final String USERNAME = "^(?=.*[a-zA-Z])[a-zA-Z\\d]{6}$";
+        public static final String USERNAME = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{6,}$";
         public static final String EMAIL = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9]{2,}\\.[A-Za-z]{2,}$";
-        public static final String PASSWORD = "^(?=.*[a-zA-Z])[a-zA-Z\\d]{6}$";
+        public static final String PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).{8,}$";
 //        public static final String USERNAME = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d]{6,}$";
 //        public static final String EMAIL = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9]{2,}\\.[A-Za-z]{2,}$";
 //        public static final String PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).{8,}$";

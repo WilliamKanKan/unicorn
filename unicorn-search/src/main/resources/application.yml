@@ -45,3 +45,8 @@ spring:
 logging:
   level:
     com.sztus.unicorn.search.repository.mapper.: debug
+openai:
+  proxyHost: 127.0.0.1
+  proxyPort: 7890
+  keys:
+    - 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
