@@ -54,9 +54,7 @@ public class ResetPasswordService {
                            account.setSalt(salt);
                            accountMapper.updateById(account);
                            simpleRedisRepository.delete(verifyCodeKey);
-                           JSONObject response = JSONObject.parseObject(AjaxResult.success(CodeEnum.SUCCESS.getText()));
-                           response.remove("data");
-                           return response;
+                           return JSONObject.parseObject(AjaxResult.success());
                        }
                        else {
                            return JSON.parseObject(AjaxResult.failure("Code is incorrect"));

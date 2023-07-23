@@ -43,7 +43,7 @@ public class SendCodeToEmail {
                  simpleRedisRepository.set(verifyCodeKey, verifyCode,NumberCode.TIMEOUT);
                  // 发送email的方法
                sendEmail(email, "Verification Code", "Your verification code is: " + verifyCode + ",5 minutes expired!");
-                    return JSON.parseObject(AjaxResult.success("null",CodeEnum.SUCCESS.getText()));
+                    return JSON.parseObject(AjaxResult.success());
                 }else {
                     return JSON.parseObject(AjaxResult.failure("Code exist"));
                 }

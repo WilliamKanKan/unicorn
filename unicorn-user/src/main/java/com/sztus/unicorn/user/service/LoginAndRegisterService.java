@@ -160,9 +160,7 @@ public class LoginAndRegisterService {
             limitLogMapper.insert(limitLog);
             accountMapper.insert(account);
             userLimitMapper.insert(userLimit);
-            JSONObject response = JSONObject.parseObject(AjaxResult.success(CodeEnum.SUCCESS.getText()));
-            response.remove("data");
-            return response;
+            return JSONObject.parseObject(AjaxResult.success());
         }
     }
 
@@ -208,9 +206,7 @@ public class LoginAndRegisterService {
             newAccount.setSalt(salt);
             userMapper.updateById(newUser);
             accountMapper.updateById(newAccount);
-            JSONObject response = JSONObject.parseObject(AjaxResult.success(CodeEnum.SUCCESS.getText()));
-            response.remove("data");
-            return response;
+            return JSONObject.parseObject(AjaxResult.success());
 
         }
 
