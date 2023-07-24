@@ -47,6 +47,10 @@ public class UserOperationController {
             return JSON.parseObject(AjaxResult.failure("Token not found or expired"));
         }
     }
+     @GetMapping(value = "/token_verify")
+    public JSONObject tokenVerify(){
+        return JSONObject.parseObject(AjaxResult.success());
+    }
     @PostMapping(value = "/recharge")
     public JSONObject limitLogRecharge(HttpServletRequest request, @RequestBody JSONObject jsonObject) {
         String tokenKey = request.getHeader("tokenKey");
