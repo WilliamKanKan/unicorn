@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sztus.unicorn.lib.cache.core.SimpleRedisRepository;
 import com.sztus.unicorn.lib.core.enumerate.CodeEnum;
 import com.sztus.unicorn.lib.core.type.AjaxResult;
-import com.sztus.unicorn.lib.core.type.RedisKeyType;
+import com.sztus.unicorn.user.object.domain.UserLimit;
 import com.sztus.unicorn.user.service.UserOperationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,36 +29,22 @@ public class UserOperationController {
     ObjectMapper newObjectMapper;
     @GetMapping(value = "/query")
     public JSONObject queryLimitValue(HttpServletRequest request){
-        String tokenKey = request.getHeader("tokenKey");
-        // 根据token从Redis中获取用户信息
-        String userLimitKey = simpleRedisRepository.generateKey(RedisKeyType.USERLIMIT, tokenKey);
-        String userInfoJson = simpleRedisRepository.get(userLimitKey);
-        if (userInfoJson != null) {
-            // 用户信息存在于Redis中
-            try {
-                JsonNode jsonNode = newObjectMapper.readTree(userInfoJson);
-                int limitValue = jsonNode.get("limitValue").asInt();
-                return JSON.parseObject(AjaxResult.success("limitValue: " + limitValue, CodeEnum.SUCCESS.getText()));
+        String userInfoJson = (String) request.getAttribute("userInfoJson");
+        return JSONObject.parseObject(AjaxResult.success(JSON.parseObject(userInfoJson,UserLimit.class), CodeEnum.SUCCESS.getText()));
 
-            } catch (JsonProcessingException e) {
-                return JSON.parseObject(AjaxResult.failure("Invalid JSON response"));
-            }
-    }else {
-            return JSON.parseObject(AjaxResult.failure("Token not found or expired"));
-        }
+    }
+    @GetMapping(value = "/token_verify")
+    public JSONObject tokenVerify(){
+        return JSONObject.parseObject(AjaxResult.success());
     }
     @PostMapping(value = "/recharge")
     public JSONObject limitLogRecharge(HttpServletRequest request, @RequestBody JSONObject jsonObject) {
-        String tokenKey = request.getHeader("tokenKey");
-        // 根据token从Redis中获取用户信息
-        String userLimitKey = simpleRedisRepository.generateKey(RedisKeyType.USERLIMIT, tokenKey);
-        String userInfoJson = simpleRedisRepository.get(userLimitKey);
+        String userInfoJson = (String) request.getAttribute("userInfoJson");
         String amount = jsonObject.getString("amount");
         if (userInfoJson != null) {
-            // 用户信息存在于Redis中,将它取出
             try {
                 JsonNode jsonNode = newObjectMapper.readTree(userInfoJson);
-                Long userId = jsonNode.get("userId").asLong();
+                long userId = jsonNode.get("id").asLong();
                 // 判断前端传入的amount否为Integer类型，如果不是就抛异常并返回输入有误
                 try {
                     int amountValue = Integer.parseInt(amount);
@@ -72,16 +58,14 @@ public class UserOperationController {
                 }
 
 
+            } catch (JsonProcessingException e) {
+                return JSON.parseObject(AjaxResult.failure("Invalid JSON response: ") + e.getMessage());
             }
-              catch (JsonProcessingException e) {
-                    return JSON.parseObject(AjaxResult.failure("Invalid JSON response: ")+ e.getMessage());
-                }
-            }else {
-                // 返回token不存在或已过期的错误信息
-                return JSON.parseObject(AjaxResult.failure("Token not found or expired"));
+        } else {
+            // 返回token不存在或已过期的错误信息
+            return JSON.parseObject(AjaxResult.failure("Token not found or expired"));
 
-            }
-
+        }
     }
     @PostMapping(value = "/limit_cut")
     public JSONObject limitLogCut(@RequestParam Long userId){

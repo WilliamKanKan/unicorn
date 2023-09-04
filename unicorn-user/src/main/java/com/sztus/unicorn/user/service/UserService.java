@@ -1,11 +1,11 @@
 package com.sztus.unicorn.user.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.sztus.unicorn.lib.core.enumerate.CodeEnum;
 import com.sztus.unicorn.lib.core.type.AjaxResult;
-import com.sztus.unicorn.lib.core.type.ApiResponse;
-import com.sztus.unicorn.lib.core.util.AjaxResultUtil;
+import com.sztus.unicorn.lib.core.util.CryptUtil;
 import com.sztus.unicorn.user.object.domain.Account;
 import com.sztus.unicorn.user.object.domain.User;
 import com.sztus.unicorn.user.repository.mapper.AccountMapper;
@@ -53,4 +53,28 @@ public class UserService {
             return AjaxResult.failure(null,CodeEnum.FAILURE.getText());
         }
     }
+
+    public String nameCode(JSONObject object){
+        String name = object.getString("name");
+        String codeName = CryptUtil.AESEncode(name, " ");
+        return codeName;
+
+
+    }
+
+    public void findKey(JSONObject jsonObject){
+        String name = jsonObject.getString("name");
+        String encryptedResult = "/QPS45ve0HlB/N51MLV1/g==";
+        int count = 0;
+        for (int i = 0; i < 100000; i++) {
+            String secretKey = null; // 在默认的secretKey后附加一个数字用于穷举
+            String decryptedResult = CryptUtil.AESDecode(encryptedResult, secretKey);
+            if (name.equals(decryptedResult)) {
+               log.info("secretKey"+ secretKey);
+            }
+            count++;
+        }
+        log.info("count: " +   String.valueOf(count));
+    }
 }
+

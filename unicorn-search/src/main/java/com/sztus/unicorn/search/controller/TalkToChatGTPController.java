@@ -72,7 +72,7 @@ public class TalkToChatGTPController {
         String question = jsonObject.getString("question");
         try {
             JsonNode jsonNode = newObjectMapper.readTree(userInfoJson);
-            long userId = jsonNode.get("userId").asLong();
+            Long userId = jsonNode.get("userId").asLong();
             int limitValue = jsonNode.get("limitValue").asInt();
             Long id = jsonObject.getLong("id");
             if (limitValue > 0) {

@@ -9,6 +9,7 @@ import com.sztus.unicorn.search.api.client.UserApi;
 import com.sztus.unicorn.search.object.domain.SearchAnswer;
 import com.sztus.unicorn.search.object.domain.SearchLog;
 import com.sztus.unicorn.search.object.domain.SearchQuestion;
+import com.sztus.unicorn.search.object.response.AnswerResponse;
 import com.sztus.unicorn.search.repository.mapper.SearchLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Options;
@@ -30,10 +31,11 @@ public class SearchChatGPTService {
         LambdaQueryWrapper<SearchLog> searchLogLambdaQueryWrapper = new LambdaQueryWrapper<>();
         searchLogLambdaQueryWrapper.eq(SearchLog::getUserId, userId).and(wrapper -> wrapper.eq(SearchLog::getId, id));
         SearchLog searchLogExist = searchLogMapper.selectOne(searchLogLambdaQueryWrapper);
-
         String answer = "你好，我是chatGPT!";
         SearchQuestion searchQuestion = new SearchQuestion();
         SearchAnswer searchAnswer = new SearchAnswer();
+        SearchLog searchLog = new SearchLog();
+        AnswerResponse answerResponse = new AnswerResponse();
 
         if (searchLogExist == null) {
             Long keyId = 1L;
@@ -45,7 +47,6 @@ public class SearchChatGPTService {
             List<SearchQuestion> searchQuestions = new ArrayList<>();
             searchAnswers.add(searchAnswer);
             searchQuestions.add(searchQuestion);
-            SearchLog searchLog = new SearchLog();
             searchLog.setUserId(userId);
             searchLog.setSearchQuestions(JSON.toJSONString(searchQuestions));
             searchLog.setSearchAnswers(JSON.toJSONString(searchAnswers));
@@ -66,8 +67,9 @@ public class SearchChatGPTService {
         }
 
         userApi.cutLimitValueByUserId(userId);
-
-        return JSON.parseObject(AjaxResult.success(searchAnswer, CodeEnum.SUCCESS.getText()));
+        answerResponse.setLogId(searchLog.getId());
+        answerResponse.setSearchAnswer(searchAnswer);
+        return JSON.parseObject(AjaxResult.success(answerResponse, CodeEnum.SUCCESS.getText()));
     }
 }
 

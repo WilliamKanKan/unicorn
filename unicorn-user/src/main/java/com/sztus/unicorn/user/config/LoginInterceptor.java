@@ -3,6 +3,7 @@ package com.sztus.unicorn.user.config;
 import com.sztus.unicorn.lib.cache.core.SimpleRedisRepository;
 import com.sztus.unicorn.lib.core.type.RedisKeyType;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,7 +19,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     private SimpleRedisRepository simpleRedisRepository;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws Exception {
         log.info("进入到拦截器中:preHandle() 方法");
         log.info(request.getLocalAddr());
         log.info(request.getLocalName());
@@ -30,6 +31,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         String userInfoJson = simpleRedisRepository.get(userKey);
         log.info(userInfoJson);
         if (userInfoJson != null) {
+            request.setAttribute("userInfoJson", userInfoJson);
             return true;
         } else {
             // 拦截请求，返回未登录或其他错误信息
