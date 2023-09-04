@@ -37,6 +37,10 @@ public class UserOperationController {
     public JSONObject tokenVerify(){
         return JSONObject.parseObject(AjaxResult.success());
     }
+     @GetMapping(value = "/token_verify")
+    public JSONObject tokenVerify(){
+        return JSONObject.parseObject(AjaxResult.success());
+    }
     @PostMapping(value = "/recharge")
     public JSONObject limitLogRecharge(HttpServletRequest request, @RequestBody JSONObject jsonObject) {
         String userInfoJson = (String) request.getAttribute("userInfoJson");
